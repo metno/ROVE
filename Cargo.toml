@@ -40,6 +40,10 @@ serde = { version = "1.0.210", features = ["derive"] }
 reqwest = { version = "0.11", features = ["json"] }
 csv = "1.3.0"
 toml = "0.8.19"
+hidefix = "0.11.1"
+anyhow = "1.0.90"
+proj = "0.27.2"
+geo = "0.28.0"
 
 [package]
 name = "rove"
@@ -71,6 +75,10 @@ chronoutil.workspace = true
 async-trait.workspace = true
 serde.workspace = true
 toml.workspace = true
+hidefix.workspace = true
+anyhow.workspace = true
+proj.workspace = true
+geo.workspace = true
 
 [build-dependencies]
 tonic-build.workspace = true

@@ -97,6 +97,7 @@
 
 pub mod data_switch;
 mod harness;
+mod modelfetch;
 mod pipeline;
 mod scheduler;
 mod server;
