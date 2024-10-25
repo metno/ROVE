@@ -1,7 +1,7 @@
 use crate::frost::{util, Error, FrostLatLonElev, FrostObs};
 use chrono::{prelude::*, Duration};
 use chronoutil::RelativeDuration;
-use rove::data_switch::{self, DataCache, Polygon, SpaceSpec, TimeSpec, Timestamp};
+use rove::data_switch::{self, DataCache, Polygon, SpaceSpec, TimeSpec, Timeseries, Timestamp};
 
 #[allow(clippy::type_complexity)]
 fn extract_data(
@@ -143,19 +143,22 @@ fn json_to_data_cache(
                 curr_obs_time = curr_obs_time + period;
             }
 
-            Ok(((station_id, data), location))
+            Ok((Timeseries{tag:station_id, values:data}, location))
         })
-        .collect::<Result<Vec<((String, Vec<Option<f32>>), FrostLatLonElev)>, Error>>()?;
+        .collect::<Result<Vec<(Timeseries<Option<f32>>, FrostLatLonElev)>, Error>>()?;
 
+    let lats = processed_ts_vec.iter().map(|ts| ts.1.latitude).collect();
+    let lons = processed_ts_vec.iter().map(|ts| ts.1.longitude).collect();
+    let elevs = processed_ts_vec.iter().map(|ts| ts.1.elevation).collect();
     Ok(DataCache::new(
-        processed_ts_vec.iter().map(|ts| ts.1.latitude).collect(),
-        processed_ts_vec.iter().map(|ts| ts.1.longitude).collect(),
-        processed_ts_vec.iter().map(|ts| ts.1.elevation).collect(),
+        processed_ts_vec.into_iter().map(|ts| ts.0).collect(),
+        lats,
+        lons,
+        elevs,
         Timestamp(interval_start.timestamp()),
         period,
         num_leading_points,
         num_trailing_points,
-        processed_ts_vec.into_iter().map(|ts| ts.0).collect(),
     ))
 }
 
@@ -355,7 +358,7 @@ mod tests {
             Utc.with_ymd_and_hms(2023, 6, 26, 14, 0, 0).unwrap(),
         );
         assert_eq!(
-            series_cache.data[0].1,
+            series_cache.data[0].values,
             vec![Some(27.3999996), Some(25.7999992), Some(26.)]
         );
     }

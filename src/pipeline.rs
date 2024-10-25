@@ -1,5 +1,5 @@
-use crate::harness::{
-    SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN, STEP_LEADING_PER_RUN, STEP_TRAILING_PER_RUN,
+use olympian::checks::series::{
+    SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN, STEP_LEADING_PER_RUN,
 };
 use serde::Deserialize;
 use std::{collections::HashMap, path::Path};
@@ -55,7 +55,7 @@ impl CheckConf {
             | CheckConf::Sct(_)
             | CheckConf::ModelConsistencyCheck(_)
             | CheckConf::Dummy => (0, 0),
-            CheckConf::StepCheck(_) => (STEP_LEADING_PER_RUN, STEP_TRAILING_PER_RUN),
+            CheckConf::StepCheck(_) => (STEP_LEADING_PER_RUN, 0),
             CheckConf::SpikeCheck(_) => (SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN),
             CheckConf::FlatlineCheck(conf) => (conf.max, 0),
         }
@@ -95,8 +95,8 @@ pub struct FlatlineCheckConf {
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct BuddyCheckConf {
-    pub radii: Vec<f32>,
-    pub nums_min: Vec<u32>,
+    pub radii: f32,
+    pub min_buddies: u32,
     pub threshold: f32,
     pub max_elev_diff: f32,
     pub elev_gradient: f32,
@@ -115,9 +115,9 @@ pub struct SctConf {
     pub min_elev_diff: f32,
     pub min_horizontal_scale: f32,
     pub vertical_scale: f32,
-    pub pos: Vec<f32>,
-    pub neg: Vec<f32>,
-    pub eps2: Vec<f32>,
+    pub pos: f32,
+    pub neg: f32,
+    pub eps2: f32,
     pub obs_to_check: Option<Vec<bool>>,
 }
 
