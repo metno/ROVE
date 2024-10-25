@@ -8,9 +8,10 @@
 //! mode, or [`Scheduler::new`](crate::Scheduler::new)
 //! otherwise.
 
+pub use olympian::{DataCache, Timeseries, Timestamp};
+
 use async_trait::async_trait;
 use chronoutil::RelativeDuration;
-use olympian::SpatialTree;
 use std::collections::HashMap;
 use thiserror::Error;
 
@@ -59,10 +60,6 @@ pub enum Error {
     #[error(transparent)]
     Other(Box<dyn std::error::Error + Send + Sync + 'static>),
 }
-
-/// Unix timestamp, inner i64 is seconds since unix epoch
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Timestamp(pub i64);
 
 /// Inclusive range of time, from a start to end [`Timestamp`]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -130,63 +127,6 @@ pub enum SpaceSpec {
     All,
 }
 
-/// Container for metereological data
-///
-/// a [`new`](DataCache::new) method is provided to
-/// avoid the need to construct an R*-tree manually
-#[derive(Debug, Clone)]
-pub struct DataCache {
-    /// Vector of timeseries.
-    ///
-    /// Each inner vector represents a timeseries, tagged with a string
-    /// identifier, with its data points in chronological order.
-    /// All these timeseries are aligned on start_time and period.
-    /// `None`s represent gaps in the series.
-    pub data: Vec<(String, Vec<Option<f32>>)>,
-    /// Time of the first observation in data
-    pub start_time: Timestamp,
-    /// Period of the timeseries, i.e. the time gap between successive elements
-    pub period: RelativeDuration,
-    /// an [R*-tree](https://en.wikipedia.org/wiki/R*-tree) used to spatially
-    /// index the data
-    pub rtree: SpatialTree,
-    /// The number of extra points in the series before the data to be QCed
-    ///
-    /// These points are needed because certain timeseries tests need more
-    /// context around points to be able to QC them. The scheduler looks at
-    /// the list of requested tests to figure out how many leading points will
-    /// be needed, and requests a SeriesCache from the DataSwitch with that
-    /// number of leading points
-    pub num_leading_points: u8,
-    /// The number of extra points in the series after the data to be QCed
-    pub num_trailing_points: u8,
-}
-
-#[allow(clippy::too_many_arguments)]
-impl DataCache {
-    /// Create a new DataCache without manually constructing the R*-tree
-    pub fn new(
-        lats: Vec<f32>,
-        lons: Vec<f32>,
-        elevs: Vec<f32>,
-        start_time: Timestamp,
-        period: RelativeDuration,
-        num_leading_points: u8,
-        num_trailing_points: u8,
-        data: Vec<(String, Vec<Option<f32>>)>,
-    ) -> Self {
-        // TODO: ensure vecs have same size
-        Self {
-            rtree: SpatialTree::from_latlons(lats, lons, elevs),
-            data,
-            start_time,
-            period,
-            num_leading_points,
-            num_trailing_points,
-        }
-    }
-}
-
 /// Trait for pulling data from data sources
 ///
 /// Uses [mod@async_trait]. It is recommended to tag your implementation with
@@ -231,6 +171,7 @@ impl DataCache {
 ///         // that's a REST request, SQL call, NFS read etc.
 ///
 ///         Ok(DataCache::new(
+///             vec![Timeseries{tag: String::from("identifier"), values: vec![Some(1.)]}],
 ///             vec![1.],
 ///             vec![1.],
 ///             vec![1.],
@@ -238,7 +179,6 @@ impl DataCache {
 ///             time_spec.time_resolution,
 ///             num_leading_points,
 ///             num_trailing_points,
-///             vec![(String::from("identifier"), vec![Some(1.)])],
 ///         ))
 ///     }
 /// }

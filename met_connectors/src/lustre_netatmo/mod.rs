@@ -3,7 +3,7 @@ use chrono::prelude::*;
 use chronoutil::RelativeDuration;
 use rove::{
     data_switch,
-    data_switch::{DataCache, DataConnector, SpaceSpec, TimeSpec, Timestamp},
+    data_switch::{DataCache, DataConnector, SpaceSpec, TimeSpec, Timeseries, Timestamp},
 };
 use serde::Deserialize;
 use std::{fs::File, io};
@@ -60,16 +60,16 @@ fn read_netatmo(timestamp: Timestamp) -> Result<DataCache, data_switch::Error> {
             lats.push(record.lat);
             lons.push(record.lon);
             elevs.push(record.elev);
-            values.push((
+            values.push(Timeseries {
                 // would be nice if we could come up with better identifiers for this
-                format!("({},{})", record.lat, record.lon),
-                vec![Some(record.value)],
-            ));
+                tag: format!("({},{})", record.lat, record.lon),
+                values: vec![Some(record.value)],
+            });
         }
     }
 
     Ok(DataCache::new(
-        lats, lons, elevs, timestamp, period, 0, 0, values,
+        values, lats, lons, elevs, timestamp, period, 0, 0,
     ))
 }
 

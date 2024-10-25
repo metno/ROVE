@@ -134,7 +134,7 @@ pub(crate) mod pb {
 #[doc(hidden)]
 pub mod dev_utils {
     use crate::{
-        data_switch::{self, DataCache, DataConnector, SpaceSpec, TimeSpec, Timestamp},
+        data_switch::{self, DataCache, DataConnector, SpaceSpec, TimeSpec, Timeseries, Timestamp},
         pipeline::{derive_num_leading_trailing, Pipeline},
     };
     use async_trait::async_trait;
@@ -163,6 +163,13 @@ pub mod dev_utils {
                     // TODO: should we maybe be using time_spec for these instead of data_id?
                     // maybe something to come back to when we finalize the format of time_spec
                     "single" => black_box(Ok(DataCache::new(
+                        vec![
+                            Timeseries {
+                                tag: "test".to_string(),
+                                values: vec![Some(1.); self.data_len_single]
+                            };
+                            1
+                        ],
                         vec![0.; 1],
                         vec![0.; 1],
                         vec![0.; 1],
@@ -170,9 +177,15 @@ pub mod dev_utils {
                         RelativeDuration::minutes(5),
                         num_leading_points,
                         num_trailing_points,
-                        vec![("test".to_string(), vec![Some(1.); self.data_len_single]); 1],
                     ))),
                     "series" => black_box(Ok(DataCache::new(
+                        vec![
+                            Timeseries {
+                                tag: "test".to_string(),
+                                values: vec![Some(1.); self.data_len_series]
+                            };
+                            1
+                        ],
                         vec![0.; 1],
                         vec![0.; 1],
                         vec![0.; 1],
@@ -180,11 +193,22 @@ pub mod dev_utils {
                         RelativeDuration::minutes(5),
                         num_leading_points,
                         num_trailing_points,
-                        vec![("test".to_string(), vec![Some(1.); self.data_len_series]); 1],
                     ))),
                     _ => panic!("unknown data_id"),
                 },
                 SpaceSpec::All => black_box(Ok(DataCache::new(
+                    vec![
+                        Timeseries {
+                            tag: "test".to_string(),
+                            values: vec![
+                                Some(1.);
+                                num_leading_points as usize
+                                    + 1
+                                    + num_trailing_points as usize
+                            ]
+                        };
+                        self.data_len_spatial
+                    ],
                     (0..self.data_len_spatial)
                         .map(|i| ((i as f32).powi(2) * 0.001) % 3.)
                         .collect(),
@@ -196,16 +220,6 @@ pub mod dev_utils {
                     RelativeDuration::minutes(5),
                     num_leading_points,
                     num_trailing_points,
-                    vec![
-                        (
-                            "test".to_string(),
-                            vec![
-                                Some(1.);
-                                num_leading_points as usize + 1 + num_trailing_points as usize
-                            ]
-                        );
-                        self.data_len_spatial
-                    ],
                 ))),
                 SpaceSpec::Polygon(_) => unimplemented!(),
             }
@@ -230,8 +244,8 @@ pub mod dev_utils {
                     name = "buddy_check"
                     [step.buddy_check]
                     max = 3
-                    radii = [5000.0]
-                    nums_min = [2]
+                    radii = 5000.0
+                    min_buddies = 2
                     threshold = 2.0
                     max_elev_diff = 200.0
                     elev_gradient = 0.0
@@ -250,9 +264,9 @@ pub mod dev_utils {
                     min_elev_diff = 200.0
                     min_horizontal_scale = 10000.0
                     vertical_scale = 200.0
-                    pos = [4.0]
-                    neg = [8.0]
-                    eps2 = [0.5]
+                    pos = 4.0
+                    neg = 8.0
+                    eps2 = 0.5
             "#,
         )
         .unwrap();
