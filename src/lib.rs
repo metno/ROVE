@@ -55,7 +55,7 @@
 //!
 //!     let rove_scheduler = Scheduler::new(construct_hardcoded_pipeline(), data_switch);
 //!
-//!     let mut rx = rove_scheduler.validate_direct(
+//!     let response = rove_scheduler.validate_direct(
 //!         "my_data_source",
 //!         &vec!["my_backing_source"],
 //!         &TimeSpec::new(
@@ -76,17 +76,9 @@
 //!         None,
 //!     ).await?;
 //!
-//!     while let Some(response) = rx.recv().await {
-//!         match response {
-//!             Ok(inner) => {
-//!                 println!("\ntest name: {}\n", inner.test);
-//!                 for result in inner.results {
-//!                     println!("timestamp: {}", result.time.unwrap().seconds);
-//!                     println!("flag: {}", result.flag);
-//!                 }
-//!             }
-//!             Err(e) => println!("uh oh, got an error: {}", e),
-//!         }
+//!     for result in response {
+//!         println!("check: {}", result.check);
+//!         println!("flags: {:?}", result.results);
 //!     }
 //!
 //!     Ok(())
@@ -97,6 +89,7 @@
 
 pub mod data_switch;
 mod harness;
+pub(crate) mod pb;
 mod pipeline;
 mod scheduler;
 mod server;
@@ -109,27 +102,6 @@ pub use server::start_server;
 
 #[doc(hidden)]
 pub use server::start_server_unix_listener;
-
-pub(crate) mod pb {
-    tonic::include_proto!("rove");
-
-    impl TryFrom<olympian::Flag> for Flag {
-        type Error = String;
-
-        fn try_from(item: olympian::Flag) -> Result<Self, Self::Error> {
-            match item {
-                olympian::Flag::Pass => Ok(Self::Pass),
-                olympian::Flag::Fail => Ok(Self::Fail),
-                olympian::Flag::Warn => Ok(Self::Warn),
-                olympian::Flag::Inconclusive => Ok(Self::Inconclusive),
-                olympian::Flag::Invalid => Ok(Self::Invalid),
-                olympian::Flag::DataMissing => Ok(Self::DataMissing),
-                olympian::Flag::Isolated => Ok(Self::Isolated),
-                _ => Err(format!("{:?}", item)),
-            }
-        }
-    }
-}
 
 #[doc(hidden)]
 pub mod dev_utils {

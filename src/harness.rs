@@ -1,17 +1,14 @@
 use crate::{
     data_switch::DataCache,
-    pb::{Flag, TestResult, ValidateResponse},
     pipeline::{CheckConf, PipelineStep},
 };
-use chrono::prelude::*;
-use chronoutil::DateRule;
 use olympian::{
     checks::{
         series::{flatline_check_cache, spike_check_cache, step_check_cache},
         single::{range_check_cache, special_values_check_cache},
         spatial::{buddy_check_cache, sct_cache, BuddyCheckArgs, SctArgs},
     },
-    SingleOrVec, Timeseries,
+    Flag, SingleOrVec, Timeseries,
 };
 use thiserror::Error;
 
@@ -26,10 +23,16 @@ pub enum Error {
     UnknownFlag(String),
 }
 
-pub fn run_test(step: &PipelineStep, cache: &DataCache) -> Result<ValidateResponse, Error> {
+#[derive(Debug, Clone)]
+pub struct CheckResult {
+    pub check: String,
+    pub results: Vec<Timeseries<Flag>>,
+}
+
+pub fn run_check(step: &PipelineStep, cache: &DataCache) -> Result<CheckResult, Error> {
     let step_name = step.name.to_string();
 
-    let flags: Vec<Timeseries<olympian::Flag>> = match &step.check {
+    let flags: Vec<Timeseries<Flag>> = match &step.check {
         CheckConf::SpecialValueCheck(conf) => {
             special_values_check_cache(cache, &conf.special_values)
         }
@@ -85,35 +88,8 @@ pub fn run_test(step: &PipelineStep, cache: &DataCache) -> Result<ValidateRespon
         }
     };
 
-    let date_rule = DateRule::new(
-        // TODO: make sure this start time is actually correct
-        Utc.timestamp_opt(cache.start_time.0, 0).unwrap(),
-        cache.period,
-    );
-    let results = flags
-        .into_iter()
-        .flat_map(|flag_series| {
-            flag_series
-                .values
-                .into_iter()
-                .zip(date_rule)
-                .zip(std::iter::repeat(flag_series.tag))
-        })
-        .map(|((flag, time), identifier)| {
-            let flag: Flag = flag.try_into().map_err(Error::UnknownFlag)?;
-            Ok(TestResult {
-                time: Some(prost_types::Timestamp {
-                    seconds: time.timestamp(),
-                    nanos: 0,
-                }),
-                identifier,
-                flag: flag.into(),
-            })
-        })
-        .collect::<Result<Vec<TestResult>, Error>>()?;
-
-    Ok(ValidateResponse {
-        test: step_name,
-        results,
+    Ok(CheckResult {
+        check: step_name,
+        results: flags,
     })
 }

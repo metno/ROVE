@@ -1,13 +1,10 @@
 use crate::{
     data_switch::{self, DataCache, DataSwitch, SpaceSpec, TimeSpec},
-    harness,
-    // TODO: rethink this dependency?
-    pb::ValidateResponse,
+    harness::{self, CheckResult},
     pipeline::Pipeline,
 };
 use std::collections::HashMap;
 use thiserror::Error;
-use tokio::sync::mpsc::{channel, Receiver};
 
 #[derive(Error, Debug)]
 #[non_exhaustive]
@@ -41,36 +38,12 @@ impl<'a> Scheduler<'a> {
         }
     }
 
-    fn schedule_tests(
-        pipeline: Pipeline,
-        data: DataCache,
-    ) -> Receiver<Result<ValidateResponse, Error>> {
-        // spawn and channel are required if you want handle "disconnect" functionality
-        // the `out_stream` will not be polled after client disconnect
-        // TODO: Should we keep this channel or just return everything together?
-        // the original idea behind the channel was that it was best to return flags ASAP, and the
-        // channel allowed us to do that without waiting for later tests to finish. Now I'm not so
-        // convinced of its utility. Since we won't run the combi check to generate end user flags
-        // until the full pipeline is finished, it doesn't seem like the individual flags have any
-        // use before that point.
-        let (tx, rx) = channel(pipeline.steps.len());
-        tokio::spawn(async move {
-            for step in pipeline.steps.iter() {
-                let result = harness::run_test(step, &data);
-
-                match tx.send(result.map_err(Error::Runner)).await {
-                    Ok(_) => {
-                        // item (server response) was queued to be send to client
-                    }
-                    Err(_item) => {
-                        // output_stream was build from rx and both are dropped
-                        break;
-                    }
-                }
-            }
-        });
-
-        rx
+    fn schedule_tests(pipeline: &Pipeline, data: DataCache) -> Result<Vec<CheckResult>, Error> {
+        pipeline
+            .steps
+            .iter()
+            .map(|step| harness::run_check(step, &data).map_err(Error::Runner))
+            .collect()
     }
 
     /// Run a set of QC tests on some data
@@ -110,7 +83,7 @@ impl<'a> Scheduler<'a> {
         // TODO: should we allow specifying multiple pipelines per call?
         test_pipeline: impl AsRef<str>,
         extra_spec: Option<&str>,
-    ) -> Result<Receiver<Result<ValidateResponse, Error>>, Error> {
+    ) -> Result<Vec<CheckResult>, Error> {
         let pipeline = self
             .pipelines
             .get(test_pipeline.as_ref())
@@ -135,8 +108,6 @@ impl<'a> Scheduler<'a> {
             }
         };
 
-        // TODO: can probably get rid of this clone if we get rid of the channels in
-        // schedule_tests
-        Ok(Scheduler::schedule_tests(pipeline.clone(), data))
+        Scheduler::schedule_tests(pipeline, data)
     }
 }

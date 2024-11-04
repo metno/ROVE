@@ -9,13 +9,9 @@ use crate::{
     scheduler::{self, Scheduler},
 };
 use chronoutil::RelativeDuration;
-use futures::Stream;
-use std::{collections::HashMap, net::SocketAddr, pin::Pin};
-use tokio::sync::mpsc::channel;
-use tokio_stream::wrappers::{ReceiverStream, UnixListenerStream};
+use std::{collections::HashMap, net::SocketAddr};
+use tokio_stream::wrappers::UnixListenerStream;
 use tonic::{transport::Server, Request, Response, Status};
-
-type ResponseStream = Pin<Box<dyn Stream<Item = Result<ValidateResponse, Status>> + Send>>;
 
 #[derive(Debug)]
 enum ListenerType {
@@ -39,13 +35,11 @@ impl From<scheduler::Error> for Status {
 
 #[tonic::async_trait]
 impl Rove for Scheduler<'static> {
-    type ValidateStream = ResponseStream;
-
     #[tracing::instrument]
     async fn validate(
         &self,
         request: Request<ValidateRequest>,
-    ) -> Result<Response<Self::ValidateStream>, Status> {
+    ) -> Result<Response<ValidateResponse>, Status> {
         tracing::debug!("Got a request: {:?}", request);
 
         let req = request.into_inner();
@@ -86,7 +80,7 @@ impl Rove for Scheduler<'static> {
             pb::validate_request::SpaceSpec::All(_) => SpaceSpec::All,
         };
 
-        let mut rx = self
+        let results: Vec<pb::CheckResult> = self
             .validate_direct(
                 req.data_source,
                 &req.backing_sources,
@@ -96,31 +90,12 @@ impl Rove for Scheduler<'static> {
                 req.extra_spec.as_deref(),
             )
             .await
-            .map_err(Into::<Status>::into)?;
+            .map_err(Into::<Status>::into)?
+            .into_iter()
+            .map(|res| res.try_into().map_err(Status::internal))
+            .collect::<Result<Vec<pb::CheckResult>, Status>>()?;
 
-        // this unwrap is fine because validate_direct already checked the hashmap entry exists
-        let pipeline_len = self.pipelines.get(&req.pipeline).unwrap().steps.len();
-
-        // TODO: remove this channel chaining once async iterators drop
-        let (tx_final, rx_final) = channel(pipeline_len);
-        tokio::spawn(async move {
-            while let Some(i) = rx.recv().await {
-                match tx_final.send(i.map_err(|e| e.into())).await {
-                    Ok(_) => {
-                        // item (server response) was queued to be send to client
-                    }
-                    Err(_item) => {
-                        // output_stream was build from rx and both are dropped
-                        break;
-                    }
-                };
-            }
-        });
-
-        let output_stream = ReceiverStream::new(rx_final);
-        Ok(Response::new(
-            Box::pin(output_stream) as Self::ValidateStream
-        ))
+        Ok(Response::new(ValidateResponse { results }))
     }
 }
 
