@@ -8,7 +8,7 @@ use rove::{
 use std::{collections::HashMap, sync::Arc};
 use tempfile::NamedTempFile;
 use tokio::net::{UnixListener, UnixStream};
-use tokio_stream::{wrappers::UnixListenerStream, StreamExt};
+use tokio_stream::wrappers::UnixListenerStream;
 use tonic::transport::{Channel, Endpoint};
 use tower::service_fn;
 
@@ -64,7 +64,7 @@ async fn integration_test_hardcoded_pipeline() {
         set_up_rove(data_switch, construct_hardcoded_pipeline()).await;
 
     let requests_future = async {
-        let mut stream = client
+        let response = client
             .validate(ValidateRequest {
                 data_source: String::from("test"),
                 backing_sources: vec![],
@@ -79,39 +79,21 @@ async fn integration_test_hardcoded_pipeline() {
             .unwrap()
             .into_inner();
 
-        let mut step_recv_count = 0;
-        let mut spike_recv_count = 0;
-        let mut buddy_recv_count = 0;
-        let mut sct_recv_count = 0;
-        while let Some(recv) = stream.next().await {
-            let inner = recv.unwrap();
-            match inner.test.as_ref() {
-                "spike_check" => {
-                    spike_recv_count += 1;
-                }
-                "step_check" => {
-                    step_recv_count += 1;
-                }
-                "buddy_check" => {
-                    buddy_recv_count += 1;
-                }
-                "sct" => {
-                    sct_recv_count += 1;
-                }
-                _ => {
-                    panic!("unrecognised test name returned")
-                }
-            }
-            let flags: Vec<i32> = inner.results.iter().map(|res| res.flag).collect();
-            assert!(
-                flags == vec![Flag::Pass as i32; DATA_LEN_SPATIAL]
-                    || flags == vec![Flag::Isolated as i32; DATA_LEN_SPATIAL]
-            );
-        }
-        assert_eq!(spike_recv_count, 1);
-        assert_eq!(step_recv_count, 1);
-        assert_eq!(buddy_recv_count, 1);
-        assert_eq!(sct_recv_count, 1);
+        assert_eq!(response.results.len(), 4);
+        assert!(response.results.iter().any(|c| c.check == "step_check"));
+        assert!(response.results.iter().any(|c| c.check == "spike_check"));
+        assert!(response.results.iter().any(|c| c.check == "buddy_check"));
+        assert!(response.results.iter().any(|c| c.check == "sct"));
+        println!("{:?}", response);
+        assert!(response.results.iter().all(|c| {
+            let flags: Vec<i32> = c
+                .flag_series
+                .iter()
+                .map(|fs| *fs.flags.first().unwrap())
+                .collect();
+            flags == vec![Flag::Pass as i32; DATA_LEN_SPATIAL]
+                || flags == vec![Flag::Isolated as i32; DATA_LEN_SPATIAL]
+        }))
     };
 
     tokio::select! {

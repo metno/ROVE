@@ -6,9 +6,7 @@ import "google/protobuf/empty.proto";
 package rove;
 
 service Rove {
-  // TODO: should we reconsider allowing results to stream, in favour of a more
-  // space efficient response format?
-  rpc Validate (ValidateRequest) returns (stream ValidateResponse) {}
+  rpc Validate (ValidateRequest) returns (ValidateResponse) {}
 }
 
 message GeoPoint {
@@ -62,18 +60,26 @@ message ValidateRequest {
   optional string extra_spec = 10;
 }
 
-message TestResult {
-  google.protobuf.Timestamp time = 1;
+message FlagSeries {
   // data source defined identifier, it's recommended to use this to identify
   // a timeseries/station/location as appropriate
-  string identifier = 2;
-  Flag flag = 3;
+  string id = 1;
+  // flags indicating the results of running the check on each element of the
+  // given timeseries. The time in the timeseries each flag applies to is 
+  // `start_time` + (`time_resolution` * index), where `start_time` and
+  // `time_resolution` are arguments given in the `ValidateRequest`
+  repeated Flag flags = 2;
+}
+
+message CheckResult {
+  // name of the check these results apply to
+  string check = 1;
+  // each of these encodes the results for one timeseries
+  repeated FlagSeries flag_series = 2;
 }
 
 message ValidateResponse {
-  // name of the test this flag is from
-  string test = 1;
-  // results for each data point, paired with timestamp and an identifier to
-  // identify the point
-  repeated TestResult results = 2;
+  // each of these contain the results from running a single check on the
+  // requested data, further broken down by timeseries
+  repeated CheckResult results = 1;
 }
