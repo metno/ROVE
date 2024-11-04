@@ -7,7 +7,8 @@ use chrono::prelude::*;
 use chronoutil::DateRule;
 use olympian::{
     checks::{
-        series::{spike_check_cache, step_check_cache},
+        series::{flatline_check_cache, spike_check_cache, step_check_cache},
+        single::{range_check_cache, special_values_check_cache},
         spatial::{buddy_check_cache, sct_cache, BuddyCheckArgs, SctArgs},
     },
     SingleOrVec, Timeseries,
@@ -29,8 +30,15 @@ pub fn run_test(step: &PipelineStep, cache: &DataCache) -> Result<ValidateRespon
     let step_name = step.name.to_string();
 
     let flags: Vec<Timeseries<olympian::Flag>> = match &step.check {
-        CheckConf::SpikeCheck(conf) => spike_check_cache(cache, conf.max)?,
+        CheckConf::SpecialValueCheck(conf) => {
+            special_values_check_cache(cache, &conf.special_values)
+        }
+        CheckConf::RangeCheck(conf) => range_check_cache(cache, conf.max, conf.min),
+        CheckConf::RangeCheckDynamic(_conf) => todo!(), // TODO: need model data
         CheckConf::StepCheck(conf) => step_check_cache(cache, conf.max)?,
+        CheckConf::SpikeCheck(conf) => spike_check_cache(cache, conf.max)?,
+        // TODO: evaluate the threshold for flaline_check
+        CheckConf::FlatlineCheck(conf) => flatline_check_cache(cache, conf.max, 0.0001)?,
         CheckConf::BuddyCheck(conf) => buddy_check_cache(
             cache,
             // TODO: from/into impl?
@@ -63,7 +71,8 @@ pub fn run_test(step: &PipelineStep, cache: &DataCache) -> Result<ValidateRespon
             },
             None,
         )?,
-        _ => {
+        CheckConf::ModelConsistencyCheck(_conf) => todo!(), // TODO: need model data
+        CheckConf::Dummy => {
             // used for integration testing
             if step_name.starts_with("test") {
                 vec![Timeseries {
