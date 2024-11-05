@@ -47,7 +47,7 @@ fn read_netatmo(timestamp: Timestamp) -> Result<DataCache, data_switch::Error> {
     let mut lats = Vec::new();
     let mut lons = Vec::new();
     let mut elevs = Vec::new();
-    let mut values = Vec::new();
+    let mut data = Vec::new();
 
     let mut rdr = csv::ReaderBuilder::new().delimiter(b';').from_reader(file);
     for result in rdr.deserialize() {
@@ -60,7 +60,7 @@ fn read_netatmo(timestamp: Timestamp) -> Result<DataCache, data_switch::Error> {
             lats.push(record.lat);
             lons.push(record.lon);
             elevs.push(record.elev);
-            values.push(Timeseries {
+            data.push(Timeseries {
                 // would be nice if we could come up with better identifiers for this
                 tag: format!("({},{})", record.lat, record.lon),
                 values: vec![Some(record.value)],
@@ -69,7 +69,7 @@ fn read_netatmo(timestamp: Timestamp) -> Result<DataCache, data_switch::Error> {
     }
 
     Ok(DataCache::new(
-        values, lats, lons, elevs, timestamp, period, 0, 0,
+        data, lats, lons, elevs, timestamp, period, 0, 0,
     ))
 }
 
