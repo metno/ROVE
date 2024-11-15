@@ -15,11 +15,11 @@ struct Args {
     address: String,
     #[arg(short = 'l', long, default_value_t = Level::INFO)]
     max_trace_level: Level,
-    #[arg(short, long, default_value_t = String::from("sample_pipeline/fresh"))]
+    #[arg(short, long, default_value_t = String::from("sample_pipelines/fresh"))]
     pipeline_dir: String,
-    #[arg(short = 'u', long, default_value_t = String::from(""))]
+    #[arg(long, default_value_t = String::from(""))]
     frost_username: String,
-    #[arg(short = 'u', long, default_value_t = String::from(""))]
+    #[arg(long, default_value_t = String::from(""))]
     frost_password: String,
 }
 
