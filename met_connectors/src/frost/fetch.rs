@@ -3,6 +3,8 @@ use chrono::{prelude::*, Duration};
 use chronoutil::RelativeDuration;
 use rove::data_switch::{self, DataCache, Polygon, SpaceSpec, TimeSpec, Timeseries, Timestamp};
 
+use super::Credentials;
+
 #[allow(clippy::type_complexity)]
 fn extract_data(
     mut resp: serde_json::Value,
@@ -168,6 +170,7 @@ pub async fn fetch_data_inner(
     num_leading_points: u8,
     num_trailing_points: u8,
     extra_spec: Option<&str>,
+    credentials: &Credentials,
 ) -> Result<DataCache, data_switch::Error> {
     // TODO: figure out how to share the client between rove reqs
     let client = reqwest::Client::new();
@@ -194,6 +197,7 @@ pub async fn fetch_data_inner(
 
     let resp: serde_json::Value = client
         .get("https://frost-beta.met.no/api/v1/obs/met.no/filter/get")
+        .basic_auth(&credentials.username, Some(&credentials.password))
         .query(&[
             extra_query_param,
             ("elementids", element_id.to_string()),

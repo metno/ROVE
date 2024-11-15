@@ -39,8 +39,16 @@ pub enum Error {
     Misalignment(String),
 }
 
+#[derive(Debug, Clone)]
+pub struct Credentials {
+    pub username: String,
+    pub password: String,
+}
+
 #[derive(Debug)]
-pub struct Frost;
+pub struct Frost {
+    pub credentials: Credentials,
+}
 
 #[derive(Deserialize, Debug)]
 struct FrostObsBody {
@@ -114,6 +122,7 @@ impl DataConnector for Frost {
             num_leading_points,
             num_trailing_points,
             extra_spec,
+            &self.credentials,
         )
         .await
     }

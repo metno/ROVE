@@ -1,4 +1,4 @@
-mod frost;
+pub mod frost;
 mod lustre_netatmo;
 
 pub use frost::Frost;

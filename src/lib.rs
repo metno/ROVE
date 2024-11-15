@@ -16,11 +16,11 @@
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let data_switch = DataSwitch::new(HashMap::from([
-//!         ("test", &TestDataSource{
+//!         ("test", Box::new(TestDataSource{
 //!             data_len_single: 3,
 //!             data_len_series: 1000,
 //!             data_len_spatial: 1000,
-//!         } as &dyn DataConnector),
+//!         }) as Box<dyn DataConnector + Send>),
 //!     ]));
 //!
 //!     start_server(
@@ -46,11 +46,11 @@
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let data_switch = DataSwitch::new(HashMap::from([
-//!         ("test", &TestDataSource{
+//!         ("test", Box::new(TestDataSource{
 //!             data_len_single: 3,
 //!             data_len_series: 1000,
 //!             data_len_spatial: 1000,
-//!         } as &dyn DataConnector),
+//!         }) as Box<dyn DataConnector + Send>),
 //!     ]));
 //!
 //!     let rove_scheduler = Scheduler::new(construct_hardcoded_pipeline(), data_switch);

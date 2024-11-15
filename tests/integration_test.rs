@@ -53,11 +53,11 @@ pub async fn set_up_rove(
 async fn integration_test_hardcoded_pipeline() {
     let data_switch = DataSwitch::new(HashMap::from([(
         "test",
-        &TestDataSource {
+        Box::new(TestDataSource {
             data_len_single: DATA_LEN_SINGLE,
             data_len_series: 1,
             data_len_spatial: DATA_LEN_SPATIAL,
-        } as &dyn DataConnector,
+        }) as Box<dyn DataConnector + Send>,
     )]));
 
     let (coordinator_future, mut client) =

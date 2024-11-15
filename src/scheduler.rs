@@ -20,7 +20,7 @@ pub enum Error {
 /// Receiver type for QC runs
 ///
 /// Holds information about test pipelines and data sources
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Scheduler<'a> {
     // this is pub so that the server can determine the number of checks in a pipeline to size
     // its channel with. can be made private if the server functionality is deprecated
