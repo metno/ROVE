@@ -1,6 +1,6 @@
 use clap::Parser;
-use met_connectors::Frost;
 use met_connectors::LustreNetatmo;
+use met_connectors::{frost, Frost};
 use rove::{
     data_switch::{DataConnector, DataSwitch},
     load_pipelines, start_server,
@@ -17,6 +17,10 @@ struct Args {
     max_trace_level: Level,
     #[arg(short, long, default_value_t = String::from("sample_pipeline/fresh"))]
     pipeline_dir: String,
+    #[arg(short = 'u', long, default_value_t = String::from(""))]
+    frost_username: String,
+    #[arg(short = 'u', long, default_value_t = String::from(""))]
+    frost_password: String,
 }
 
 // TODO: use anyhow for error handling?
@@ -28,9 +32,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_max_level(args.max_trace_level)
         .init();
 
+    let frost_connector = Frost {
+        credentials: frost::Credentials {
+            username: args.frost_username,
+            password: args.frost_password,
+        },
+    };
+
     let data_switch = DataSwitch::new(HashMap::from([
-        ("frost", &Frost as &dyn DataConnector),
-        ("lustre_netatmo", &LustreNetatmo as &dyn DataConnector),
+        (
+            "frost",
+            Box::new(frost_connector) as Box<dyn DataConnector + Send>,
+        ),
+        (
+            "lustre_netatmo",
+            Box::new(LustreNetatmo) as Box<dyn DataConnector + Send>,
+        ),
     ]));
 
     start_server(
