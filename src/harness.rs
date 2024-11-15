@@ -36,7 +36,7 @@ pub fn run_check(step: &PipelineStep, cache: &DataCache) -> Result<CheckResult, 
         CheckConf::SpecialValueCheck(conf) => {
             special_values_check_cache(cache, &conf.special_values)
         }
-        CheckConf::RangeCheck(conf) => range_check_cache(cache, conf.max, conf.min),
+        CheckConf::RangeCheck(conf) => range_check_cache(cache, conf.min, conf.max),
         CheckConf::RangeCheckDynamic(_conf) => todo!(), // TODO: need model data
         CheckConf::StepCheck(conf) => step_check_cache(cache, conf.max)?,
         CheckConf::SpikeCheck(conf) => spike_check_cache(cache, conf.max)?,

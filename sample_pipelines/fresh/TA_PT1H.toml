@@ -16,10 +16,10 @@ name = "range_check"
 min = -55
 max = 50
 
-[[step]]
-name = "climate_range_check"
-[step.range_check_dynamic]
-source = "netcdf" # TODO: define a neat spec for this?
+# [[step]]
+# name = "climate_range_check"
+# [step.range_check_dynamic]
+# source = "netcdf" # TODO: define a neat spec for this?
 
 [[step]]
 name = "step_check"
@@ -36,9 +36,9 @@ name = "spike_check"
 [step.spike_check]
 max = 18.6
 
-[[step]]
-name = "model_consistency_check"
-[step.model_consistency_check]
-model_source = "lustre"
-model_args = "arome/air_temperature" # TODO: verify if we need more args than this for the model
-threshold = 3.0 # FIXME: made up value by Ingrid
+# [[step]]
+# name = "model_consistency_check"
+# [step.model_consistency_check]
+# model_source = "lustre"
+# model_args = "arome/air_temperature" # TODO: verify if we need more args than this for the model
+# threshold = 3.0 # FIXME: made up value by Ingrid

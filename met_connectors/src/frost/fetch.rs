@@ -32,11 +32,11 @@ fn extract_data(
 
             // TODO: differentiate actual parse errors from missing duration?
             let ts_time_resolution_result = util::extract_duration(header);
-            if ts_time_resolution_result.is_err()
-                || ts_time_resolution_result.unwrap() != request_time_resolution
-            {
-                return Ok(None);
-            }
+            // if ts_time_resolution_result.is_err()
+            //     || ts_time_resolution_result.unwrap() != request_time_resolution
+            // {
+            //     return Ok(None);
+            // }
 
             let station_id = util::extract_station_id(header)?;
 
@@ -195,7 +195,7 @@ pub async fn fetch_data_inner(
         ))),
     }?;
 
-    let resp: serde_json::Value = client
+    let req = client
         .get("https://frost-beta.met.no/api/v1/obs/met.no/filter/get")
         .basic_auth(&credentials.username, Some(&credentials.password))
         .query(&[
@@ -215,7 +215,9 @@ pub async fn fetch_data_inner(
                 ), // .as_str(),
             ),
             ("geopostype", "stationary".to_string()),
-        ])
+        ]);
+
+    let resp: serde_json::Value = req
         .send()
         .await
         .map_err(|e| data_switch::Error::Other(Box::new(Error::Request(e))))?

@@ -71,6 +71,7 @@ pub struct Timerange {
 }
 
 /// Specifier of which data to fetch from a source by time, and time resolution
+#[derive(Debug)]
 pub struct TimeSpec {
     /// The range in time of data to fetch
     pub timerange: Timerange,
@@ -118,6 +119,7 @@ pub struct GeoPoint {
 pub type Polygon = Vec<GeoPoint>;
 
 /// Specifier of which data to fetch from a source by location
+#[derive(Debug)]
 pub enum SpaceSpec {
     /// One single timeseries, specified with a data_id
     One(String),

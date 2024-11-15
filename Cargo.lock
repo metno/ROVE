@@ -1291,6 +1291,8 @@ dependencies = [
 name = "met_binary"
 version = "0.1.1"
 dependencies = [
+ "chrono",
+ "chronoutil",
  "clap",
  "met_connectors",
  "rove",

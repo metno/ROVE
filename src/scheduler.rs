@@ -84,10 +84,22 @@ impl<'a> Scheduler<'a> {
         test_pipeline: impl AsRef<str>,
         extra_spec: Option<&str>,
     ) -> Result<Vec<CheckResult>, Error> {
+        println!("Received request!\n");
+        println!("arguments:");
+        println!("\tdata_source: {:?}", data_source.as_ref());
+        println!("\ttime_spec: {:?}", time_spec);
+        println!("\tspace_spec: {:?}", space_spec);
+        println!("\textra_spec: {:?}", extra_spec);
+        println!("\tpipeline: {:?}\n", test_pipeline.as_ref());
+
         let pipeline = self
             .pipelines
             .get(test_pipeline.as_ref())
             .ok_or(Error::InvalidArg("pipeline not recognised"))?;
+
+        println!("Found pipeline: {:#?}\n", pipeline);
+
+        println!("Fetching data from Frost...\n");
 
         let data = match self
             .data_switch
@@ -107,6 +119,10 @@ impl<'a> Scheduler<'a> {
                 return Err(Error::DataSwitch(e));
             }
         };
+
+        println!("Fetched data: {:#?}\n", data);
+
+        println!("Running checks...\n");
 
         Scheduler::schedule_tests(pipeline, data)
     }
