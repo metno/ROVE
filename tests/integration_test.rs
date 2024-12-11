@@ -20,7 +20,7 @@ const DATA_LEN_SINGLE: usize = 3;
 const DATA_LEN_SPATIAL: usize = 1000;
 
 pub async fn set_up_rove(
-    data_switch: DataSwitch<'static>,
+    data_switch: DataSwitch,
     pipelines: HashMap<String, Pipeline>,
 ) -> (impl Future<Output = ()>, RoveClient<Channel>) {
     let coordintor_socket = NamedTempFile::new().unwrap();
@@ -52,7 +52,7 @@ pub async fn set_up_rove(
 #[tokio::test]
 async fn integration_test_hardcoded_pipeline() {
     let data_switch = DataSwitch::new(HashMap::from([(
-        "test",
+        String::from("test"),
         Box::new(TestDataSource {
             data_len_single: DATA_LEN_SINGLE,
             data_len_series: 1,
