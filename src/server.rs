@@ -34,7 +34,7 @@ impl From<scheduler::Error> for Status {
 }
 
 #[tonic::async_trait]
-impl Rove for Scheduler<'static> {
+impl Rove for Scheduler {
     #[tracing::instrument]
     async fn validate(
         &self,
@@ -101,7 +101,7 @@ impl Rove for Scheduler<'static> {
 
 async fn start_server_inner(
     listener: ListenerType,
-    data_switch: DataSwitch<'static>,
+    data_switch: DataSwitch,
     pipelines: HashMap<String, Pipeline>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let rove_service = Scheduler::new(pipelines, data_switch);
@@ -132,7 +132,7 @@ async fn start_server_inner(
 #[doc(hidden)]
 pub async fn start_server_unix_listener(
     stream: UnixListenerStream,
-    data_switch: DataSwitch<'static>,
+    data_switch: DataSwitch,
     pipelines: HashMap<String, Pipeline>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     start_server_inner(ListenerType::UnixListener(stream), data_switch, pipelines).await
@@ -145,7 +145,7 @@ pub async fn start_server_unix_listener(
 /// of pipelines of checks that can be run on data, keyed by their names.
 pub async fn start_server(
     addr: SocketAddr,
-    data_switch: DataSwitch<'static>,
+    data_switch: DataSwitch,
     pipelines: HashMap<String, Pipeline>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     start_server_inner(ListenerType::Addr(addr), data_switch, pipelines).await

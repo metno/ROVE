@@ -215,24 +215,25 @@ pub trait DataConnector: Sync + std::fmt::Debug {
 /// };
 /// use std::collections::HashMap;
 ///
-/// let data_switch = DataSwitch::new(HashMap::from([
-///     ("test", Box::new(TestDataSource{
+/// let data_switch = DataSwitch::new(HashMap::from([(
+///     String::from("test"),
+///     Box::new(TestDataSource{
 ///         data_len_single: 3,
 ///         data_len_series: 1000,
 ///         data_len_spatial: 1000,
-///     }) as Box<dyn DataConnector + Send>),
-/// ]));
+///     }) as Box<dyn DataConnector + Send>
+/// )]));
 /// ```
 #[derive(Debug)]
-pub struct DataSwitch<'ds> {
-    sources: HashMap<&'ds str, Box<dyn DataConnector + Send>>,
+pub struct DataSwitch {
+    sources: HashMap<String, Box<dyn DataConnector + Send>>,
 }
 
-impl<'ds> DataSwitch<'ds> {
+impl DataSwitch {
     /// Instantiate a new DataSwitch
     ///
     /// See the DataSwitch struct documentation for more info
-    pub fn new(sources: HashMap<&'ds str, Box<dyn DataConnector + Send>>) -> Self {
+    pub fn new(sources: HashMap<String, Box<dyn DataConnector + Send>>) -> Self {
         Self { sources }
     }
 

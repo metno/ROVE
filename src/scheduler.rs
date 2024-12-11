@@ -21,17 +21,17 @@ pub enum Error {
 ///
 /// Holds information about test pipelines and data sources
 #[derive(Debug)]
-pub struct Scheduler<'a> {
+pub struct Scheduler {
     // this is pub so that the server can determine the number of checks in a pipeline to size
     // its channel with. can be made private if the server functionality is deprecated
     #[allow(missing_docs)]
     pub pipelines: HashMap<String, Pipeline>,
-    data_switch: DataSwitch<'a>,
+    data_switch: DataSwitch,
 }
 
-impl<'a> Scheduler<'a> {
+impl Scheduler {
     /// Instantiate a new scheduler
-    pub fn new(pipelines: HashMap<String, Pipeline>, data_switch: DataSwitch<'a>) -> Self {
+    pub fn new(pipelines: HashMap<String, Pipeline>, data_switch: DataSwitch) -> Self {
         Scheduler {
             pipelines,
             data_switch,

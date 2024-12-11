@@ -41,11 +41,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let data_switch = DataSwitch::new(HashMap::from([
         (
-            "frost",
+            String::from("frost"),
             Box::new(frost_connector) as Box<dyn DataConnector + Send>,
         ),
         (
-            "lustre_netatmo",
+            String::from("lustre_netatmo"),
             Box::new(LustreNetatmo) as Box<dyn DataConnector + Send>,
         ),
     ]));
