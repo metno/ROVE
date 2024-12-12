@@ -1,3 +1,5 @@
+//! Utilities for scheduling QC checks
+
 use crate::{
     data_switch::{self, DataCache, DataSwitch, SpaceSpec, TimeSpec},
     harness::{self, CheckResult},
@@ -6,13 +8,17 @@ use crate::{
 use std::collections::HashMap;
 use thiserror::Error;
 
+/// Error type for Scheduler methods
 #[derive(Error, Debug)]
 #[non_exhaustive]
 pub enum Error {
-    #[error("failed to run test: {0}")]
+    /// The check harness returned an error
+    #[error("failed to run check: {0}")]
     Runner(#[from] harness::Error),
+    /// The method received an invalid argument
     #[error("invalid argument: {0}")]
     InvalidArg(&'static str),
+    /// The [`DataSwitch`] returned an error
     #[error("data switch failed to find data: {0}")]
     DataSwitch(#[from] data_switch::Error),
 }
