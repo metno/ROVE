@@ -102,6 +102,9 @@ pub use scheduler::Scheduler;
 
 pub use server::start_server;
 
+// re-exporting as this appears in our public API
+pub use olympian::Flag;
+
 #[doc(hidden)]
 pub use server::start_server_unix_listener;
 
