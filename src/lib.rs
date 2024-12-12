@@ -93,7 +93,7 @@ pub mod data_switch;
 mod harness;
 pub(crate) mod pb;
 mod pipeline;
-mod scheduler;
+pub mod scheduler;
 mod server;
 
 pub use pipeline::{load_pipelines, Pipeline};
