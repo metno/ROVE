@@ -44,7 +44,9 @@ impl Scheduler {
         }
     }
 
-    fn schedule_tests(pipeline: &Pipeline, data: DataCache) -> Result<Vec<CheckResult>, Error> {
+    /// Directly invoke a Pipeline on a Datacache. If you want the scheduler to fetch the Pipeline
+    /// and DataCache for you, see [`validate_direct`](Scheduler::validate_direct).
+    pub fn schedule_tests(pipeline: &Pipeline, data: DataCache) -> Result<Vec<CheckResult>, Error> {
         pipeline
             .steps
             .iter()
