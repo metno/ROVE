@@ -92,7 +92,7 @@
 pub mod data_switch;
 mod harness;
 pub(crate) mod pb;
-mod pipeline;
+pub mod pipeline;
 pub mod scheduler;
 mod server;
 
