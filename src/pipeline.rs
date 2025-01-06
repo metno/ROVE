@@ -1,3 +1,5 @@
+//! Definitions and utilities for deserialising QC pipelines
+
 use olympian::checks::series::{
     SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN, STEP_LEADING_PER_RUN,
 };
@@ -8,7 +10,9 @@ use thiserror::Error;
 /// Data structure defining a pipeline of checks, with parameters built in
 ///
 /// Rather than constructing these manually, a convenience function `load_pipelines` is provided
-/// to deserialize a set of pipelines from a directory containing TOML files defining them.
+/// to deserialize a set of pipelines from a directory containing TOML files defining them. Users
+/// may still want to write their own implementation of load_pipelines in case they want to encode
+/// extra information in the pipeline definitions, or use a different directory structure
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct Pipeline {
     /// Sequence of steps in the pipeline
@@ -22,15 +26,24 @@ pub struct Pipeline {
     pub num_trailing_required: u8,
 }
 
+/// One step in a pipeline
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct PipelineStep {
+    /// Name of the step
+    ///
+    /// This is kept distinct from the name of the check, as one check may be used for several
+    /// different steps with different purposes within a pipeline. Most often this will simply
+    /// shadow the name of the check though.
     pub name: String,
+    /// Defines which check is to be used for this step, along with a configuration for that check
     #[serde(flatten)]
     pub check: CheckConf,
 }
 
+/// Identifies a check, and provides a configuration (arguments) for it
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
+#[allow(missing_docs)]
 pub enum CheckConf {
     SpecialValueCheck(SpecialValueCheckConf),
     RangeCheck(RangeCheckConf),
@@ -41,6 +54,7 @@ pub enum CheckConf {
     BuddyCheck(BuddyCheckConf),
     Sct(SctConf),
     ModelConsistencyCheck(ModelConsistencyCheckConf),
+    /// Mock pipeline used for testing
     #[serde(skip)]
     Dummy,
 }
@@ -63,37 +77,44 @@ impl CheckConf {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct SpecialValueCheckConf {
     pub special_values: Vec<f32>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct RangeCheckConf {
     pub max: f32,
     pub min: f32,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct RangeCheckDynamicConf {
     pub source: String,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct StepCheckConf {
     pub max: f32,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct SpikeCheckConf {
     pub max: f32,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct FlatlineCheckConf {
     pub max: u8,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct BuddyCheckConf {
     pub radii: f32,
     pub min_buddies: u32,
@@ -105,6 +126,7 @@ pub struct BuddyCheckConf {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct SctConf {
     pub num_min: usize,
     pub num_max: usize,
@@ -122,12 +144,14 @@ pub struct SctConf {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub struct ModelConsistencyCheckConf {
     pub model_source: String,
     pub model_args: String,
     pub threshold: f32,
 }
 
+/// Errors relating to pipeline deserialization
 #[derive(Error, Debug)]
 pub enum Error {
     /// Generic IO error
