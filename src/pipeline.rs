@@ -76,12 +76,14 @@ impl CheckConf {
     }
 }
 
+/// See [`olympian::checks::single::special_values_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct SpecialValueCheckConf {
     pub special_values: Vec<f32>,
 }
 
+/// See [`olympian::checks::single::range_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct RangeCheckConf {
@@ -89,30 +91,35 @@ pub struct RangeCheckConf {
     pub min: f32,
 }
 
+// TODO: document this once we have a concrete impl to base docs on
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct RangeCheckDynamicConf {
     pub source: String,
 }
 
+/// See [`olympian::checks::series::step_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct StepCheckConf {
     pub max: f32,
 }
 
+/// See [`olympian::checks::series::spike_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct SpikeCheckConf {
     pub max: f32,
 }
 
+/// See [`olympian::checks::series::flatline_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct FlatlineCheckConf {
     pub max: u8,
 }
 
+/// See [`olympian::checks::spatial::buddy_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct BuddyCheckConf {
@@ -125,6 +132,7 @@ pub struct BuddyCheckConf {
     pub num_iterations: u32,
 }
 
+/// See [`olympian::checks::spatial::sct`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct SctConf {
@@ -143,6 +151,7 @@ pub struct SctConf {
     pub obs_to_check: Option<Vec<bool>>,
 }
 
+// TODO: document this once we have a concrete impl to base docs on
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct ModelConsistencyCheckConf {
