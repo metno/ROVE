@@ -1,8 +1,8 @@
-//! Utilities for creating and using [`DataConnector`](crate::data_switch::DataConnector)s
+//! Utilities for creating and using [`DataConnector`]s
 //!
-//! Implementations of the [`DataConnector`](crate::data_switch::DataConnector)
+//! Implementations of the [`DataConnector`]
 //! trait are how ROVE accesses to data for QC. For any data source you wish ROVE to be able to pull data from, you must write an implementation of
-//! [`DataConnector`](crate::data_switch::DataConnector) for it, and load that
+//! [`DataConnector`] for it, and load that
 //! connector into a [`DataSwitch`], which you then pass to
 //! [`start_server`](crate::start_server) if using ROVE in gRPC
 //! mode, or [`Scheduler::new`](crate::Scheduler::new)

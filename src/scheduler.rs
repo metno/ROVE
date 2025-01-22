@@ -57,7 +57,7 @@ impl Scheduler {
     /// Run a set of QC tests on some data
     ///
     /// `data_source` is the key identifying a connector in the
-    /// [`DataSwitch`](data_switch::DataSwitch).
+    /// [`DataSwitch`].
     /// `backing_sources` a list of keys similar to `data_source`, but data
     /// from these will only be used to QC data from `data_source` and will not
     /// themselves be QCed.
