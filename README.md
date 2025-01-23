@@ -10,7 +10,7 @@ ROVE is a system for performing real-time quality control (spatial and temporal)
 In alpha testing.
 
 ## Benchmarks
-Benchmarking code is available [here](https://github.com/metno/rove/blob/trunk/met_binary/benches/scalability_deliverable.rs).
+Benchmarking code is available [here](https://github.com/metno/rove/blob/trunk/benches/scalability_deliverable.rs).
 
 There are three benchmarks: 
 - single, which spams ROVE with requests to run dip_check and step_check on a single piece of data each
