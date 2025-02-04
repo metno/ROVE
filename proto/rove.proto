@@ -10,8 +10,8 @@ service Rove {
 }
 
 message GeoPoint {
-  float lat = 1;
-  float lon = 2;
+  double lat = 1;
+  double lon = 2;
 }
 
 message Polygon {

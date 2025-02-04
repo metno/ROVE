@@ -107,9 +107,9 @@ impl TimeSpec {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GeoPoint {
     /// latitude, in degrees
-    pub lat: f32,
+    pub lat: f64,
     /// longitude, in degrees
-    pub lon: f32,
+    pub lon: f64,
 }
 
 /// A geospatial polygon

@@ -187,10 +187,10 @@ pub mod dev_utils {
                         self.data_len_spatial
                     ],
                     (0..self.data_len_spatial)
-                        .map(|i| ((i as f32).powi(2) * 0.001) % 3.)
+                        .map(|i| ((i as f64).powi(2) * 0.001) % 3.)
                         .collect(),
                     (0..self.data_len_spatial)
-                        .map(|i| ((i as f32 + 1.).powi(2) * 0.001) % 3.)
+                        .map(|i| ((i as f64 + 1.).powi(2) * 0.001) % 3.)
                         .collect(),
                     vec![1.; self.data_len_spatial],
                     Timestamp(0),

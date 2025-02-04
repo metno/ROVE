@@ -53,7 +53,7 @@ pub struct Frost {
 #[derive(Deserialize, Debug)]
 struct FrostObsBody {
     #[serde(deserialize_with = "des_value")]
-    value: f32,
+    value: f64,
 }
 
 // TODO: flatten this with FrostObsBody?
@@ -68,11 +68,11 @@ struct FrostObs {
 struct FrostLatLonElev {
     #[serde(rename = "elevation(masl/hs)")]
     #[serde(deserialize_with = "des_value")]
-    elevation: f32,
+    elevation: f64,
     #[serde(deserialize_with = "des_value")]
-    latitude: f32,
+    latitude: f64,
     #[serde(deserialize_with = "des_value")]
-    longitude: f32,
+    longitude: f64,
 }
 
 #[derive(Deserialize, Debug)]
@@ -84,7 +84,7 @@ struct FrostLocation {
     value: FrostLatLonElev,
 }
 
-fn des_value<'de, D>(deserializer: D) -> Result<f32, D::Error>
+fn des_value<'de, D>(deserializer: D) -> Result<f64, D::Error>
 where
     D: Deserializer<'de>,
     D::Error: serde::de::Error,
