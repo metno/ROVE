@@ -23,13 +23,13 @@ pub async fn set_up_rove(
     data_switch: DataSwitch,
     pipelines: HashMap<String, Pipeline>,
 ) -> (impl Future<Output = ()>, RoveClient<Channel>) {
-    let coordintor_socket = NamedTempFile::new().unwrap();
-    let coordintor_socket = Arc::new(coordintor_socket.into_temp_path());
-    std::fs::remove_file(&*coordintor_socket).unwrap();
-    let coordintor_uds = UnixListener::bind(&*coordintor_socket).unwrap();
-    let coordintor_stream = UnixListenerStream::new(coordintor_uds);
+    let coordinator_socket = NamedTempFile::new().unwrap();
+    let coordinator_socket = Arc::new(coordinator_socket.into_temp_path());
+    std::fs::remove_file(&*coordinator_socket).unwrap();
+    let coordinator_uds = UnixListener::bind(&*coordinator_socket).unwrap();
+    let coordinator_stream = UnixListenerStream::new(coordinator_uds);
     let coordinator_future = async {
-        start_server_unix_listener(coordintor_stream, data_switch, pipelines)
+        start_server_unix_listener(coordinator_stream, data_switch, pipelines)
             .await
             .unwrap();
     };
@@ -37,7 +37,7 @@ pub async fn set_up_rove(
     let coordinator_channel = Endpoint::try_from("http://any.url")
         .unwrap()
         .connect_with_connector(service_fn(move |_: tonic::transport::Uri| {
-            let socket = Arc::clone(&coordintor_socket);
+            let socket = Arc::clone(&coordinator_socket);
             async move { UnixStream::connect(&*socket).await }
         }))
         .await
