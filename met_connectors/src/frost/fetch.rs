@@ -147,7 +147,7 @@ fn json_to_data_cache(
 
             Ok((Timeseries{tag:station_id, values:data}, location))
         })
-        .collect::<Result<Vec<(Timeseries<Option<f32>>, FrostLatLonElev)>, Error>>()?;
+        .collect::<Result<Vec<(Timeseries<Option<f64>>, FrostLatLonElev)>, Error>>()?;
 
     let lats = processed_ts_vec.iter().map(|ts| ts.1.latitude).collect();
     let lons = processed_ts_vec.iter().map(|ts| ts.1.longitude).collect();

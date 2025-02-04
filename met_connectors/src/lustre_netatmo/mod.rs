@@ -13,10 +13,10 @@ pub struct LustreNetatmo;
 
 #[derive(Debug, Deserialize)]
 struct Record {
-    lat: f32,
-    lon: f32,
-    elev: f32,
-    value: f32,
+    lat: f64,
+    lon: f64,
+    elev: f64,
+    value: f64,
     // Provider ID
     // 1=WMO stations, 2=MET Non-WMO stations, 3=Netatmo, 4=Foreign WMO, 5=SVV, 6=Bergensværet, 7=FMI, 8=Luftambulansen, 9=Holfuy, 100=Radar precipitation
     prid: u32,

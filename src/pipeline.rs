@@ -80,15 +80,15 @@ impl CheckConf {
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct SpecialValueCheckConf {
-    pub special_values: Vec<f32>,
+    pub special_values: Vec<f64>,
 }
 
 /// See [`olympian::checks::single::range_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct RangeCheckConf {
-    pub max: f32,
-    pub min: f32,
+    pub max: f64,
+    pub min: f64,
 }
 
 // TODO: document this once we have a concrete impl to base docs on
@@ -102,14 +102,14 @@ pub struct RangeCheckDynamicConf {
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct StepCheckConf {
-    pub max: f32,
+    pub max: f64,
 }
 
 /// See [`olympian::checks::series::spike_check`]
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct SpikeCheckConf {
-    pub max: f32,
+    pub max: f64,
 }
 
 /// See [`olympian::checks::series::flatline_check`]
@@ -123,12 +123,12 @@ pub struct FlatlineCheckConf {
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(missing_docs)]
 pub struct BuddyCheckConf {
-    pub radii: f32,
+    pub radii: f64,
     pub min_buddies: u32,
-    pub threshold: f32,
-    pub max_elev_diff: f32,
-    pub elev_gradient: f32,
-    pub min_std: f32,
+    pub threshold: f64,
+    pub max_elev_diff: f64,
+    pub elev_gradient: f64,
+    pub min_std: f64,
     pub num_iterations: u32,
 }
 
@@ -138,16 +138,16 @@ pub struct BuddyCheckConf {
 pub struct SctConf {
     pub num_min: usize,
     pub num_max: usize,
-    pub inner_radius: f32,
-    pub outer_radius: f32,
+    pub inner_radius: f64,
+    pub outer_radius: f64,
     pub num_iterations: u32,
     pub num_min_prof: usize,
-    pub min_elev_diff: f32,
-    pub min_horizontal_scale: f32,
-    pub vertical_scale: f32,
-    pub pos: f32,
-    pub neg: f32,
-    pub eps2: f32,
+    pub min_elev_diff: f64,
+    pub min_horizontal_scale: f64,
+    pub vertical_scale: f64,
+    pub pos: f64,
+    pub neg: f64,
+    pub eps2: f64,
     pub obs_to_check: Option<Vec<bool>>,
 }
 
@@ -157,7 +157,7 @@ pub struct SctConf {
 pub struct ModelConsistencyCheckConf {
     pub model_source: String,
     pub model_args: String,
-    pub threshold: f32,
+    pub threshold: f64,
 }
 
 /// Errors relating to pipeline deserialization
