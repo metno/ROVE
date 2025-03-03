@@ -1,0 +1,50 @@
+@startuml Confident_Component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_TOP_DOWN()
+
+title
+  Confident Component diagram
+end title
+
+Person(user, "User", "A user at MET that may want to run extra QC or integrate a new QC tests and see the outcome")
+'System(new_obs_system, "LARD ingestor", "Automated system that triggers the QC that needs to run automatically")
+System_Ext(obsinn, "Obsinn", "Entry point for new observations at MET")
+
+System_Ext(frost, "Frost", "Rest API")
+SystemDb_Ext(lard, "LARD database", "Postgres database.")
+SystemDb_Ext(lustre, "Lustre", "File system")
+SystemDb_Ext(datasources, "Other data sources", "Other data sources needed for QC")
+
+'System_Boundary(Confident, "QC system for observations") {
+  'Container_Boundary(rove, "ROVE") {
+  Container_Boundary(lard_ingestor, "LARD ingestor") {
+    Component(server, "HTTP server", "Rust", "HTTP server, receives new data")
+    Component(scheduler, "Scheduler", "Rust", "Schedules QC tests, routes data between the switch and harness")
+    Component(test_harness, "Test harness", "Rust", "Organises and runs QC tests, interfacing any differences in input or output shape")
+    Component(data_switch, "Data switch", "Rust", "Contains connector modules for all available data sources, and routes requests for data to them")
+    Component(pipelines, "Pipeline registry", "Rust", "Loads pipeline definitions from toml files and stores them")
+  }
+'}
+
+'Rel_U(new_obs_system, kafka, "opens stream, and receives notifications of arrival of new data", "sarama")
+Rel(obsinn, server, "Sends packets of new data", "HTTPS")
+Rel(server, lard, "writes data and QC info to", "Postgres protocol")
+'Rel(new_obs_system, server, "creates automated API calls to, and receives QC flags in return", "GRPC")
+
+Rel(server, scheduler, "requests tests to be scheduled", "function call")
+Rel(scheduler, data_switch, "requests data needed for QC tests", "function call")
+
+Rel(data_switch, lard, "gets data needed by cache", "GRPC")
+Rel(data_switch, lustre, "gets data needed by cache", "NFS")
+Rel(data_switch, frost, "gets data needed by cache", "HTTPS")
+Rel(data_switch, datasources, "gets data needed by cache")
+
+Rel(scheduler, pipelines, "requests the relevant pipeline", "function call")
+
+Rel(scheduler, test_harness, "requests QC tests to be run on provided data, and receives QC flags in return", "function call")
+
+'Rel(user, server, "creates manual API calls, and receives QC flags in return", "GRPC/HTTPS")
+Rel_U(user, frost, "gets output of QC tests, or more general data quality information from", "HTTPS")
+Rel(frost, lard, "gets QC data needed to satifsy API requests", "Postgres protocol")
+@enduml
